@@ -83,11 +83,13 @@ def run(ast):
                     break
             if has_sub_expression:
                 continue
-            head.val = evaluate(head)
+            val = evaluate(head)
+            print "{}: {}".format(head, val)
+            head.val = val
         elif type(head) == Atom:
             print "it's an atom!"
     import pdb; pdb.set_trace()
 
-input_str = "(define a 1) (define b 2) (+ a b)"
+input_str = "(define a 1) (define a 2) (define b 2) (+ a b)"
 ast = parser(input_str)
 run(ast)
