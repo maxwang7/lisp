@@ -1,6 +1,22 @@
 # Design
 
-Version: V0.0
+Try it out! `python lisp.py`
+
+Supports:
+- `eq?`
+- `atom?`
+- `define`
+- `lambda`
+- `cond`
+
+And has the built-ins: `+`, `-`, `*`, `/`
+
+On the roadmap...
+- `quote`
+- `cons`, `car`, `cdr`
+- `cond`
+- And better overall testing...
+
 
 There are two parts
 - parser - implemented in `parse()`. This function takes a raw Lisp
