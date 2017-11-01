@@ -18,7 +18,7 @@ On the roadmap...
 - `cons`, `car`, `cdr`
 - `cond`
 
-Used https://repl.it/languages/scheme as a reference implementation. (not all things are the same about Scheme and this implementation of lisp; for example, Scheme doesn't have an `atom?` built-in)
+See http://pythonpracticeprojects.com/lisp.html for a high level description of the language specification. Used https://repl.it/languages/scheme as a reference implementation. (not all things are the same about Scheme and this implementation of lisp; for example, Scheme doesn't have an `atom?` built-in)
 
 
 There are two parts
