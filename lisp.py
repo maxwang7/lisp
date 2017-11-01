@@ -70,6 +70,7 @@ class List(Expression):
             temp_list.args.extend(self.args[1:])
             return temp_list.run(context)
         else:
+            import pdb; pdb.set_trace()
             print "unknown form"
 
 class Context(object):
@@ -140,11 +141,34 @@ def run(program):
             print result
 
 if __name__ == "__main__":
-    program = Program()
-    try:
-        while True:
-            line = raw_input("> ")
-            program.parse(line)
-            run(program)
-    except EOFError:
-        pass
+    if len(sys.argv) == 1:
+        program = Program()
+        try:
+            while True:
+                line = raw_input("> ")
+                program.parse(line)
+                run(program)
+        except EOFError:
+            pass
+    elif len(sys.argv) >= 2 and sys.argv[1] == 'test':
+        program = Program()
+        def check(input_string, expected):
+            program.parse(input_string)
+            result = str(program.step())
+            if result == expected:
+                print "PASS: {}: {}".format(input_string, expected)
+            else:
+                print "FAIL: input: {}, expected: {}, but got: {}".format(input_string, expected, result)
+
+        check("5", "5")
+        check("(+ 1 1)", "2")
+        check("(define a 1)", "None")
+        check("(+ a 1)", "2")
+        check("(+ (- 1 2) (* 1 1))", "0")
+        check("(eq? -1 (- 0 1))", "True")
+        check("((lambda (x) x) 5)", "5")
+        check("((lambda (x y) (* x y)) 5 6)", "30")
+        check("(define a 5)", "None")
+        check("((lambda (x y) (* x y)) a 6)", "30")
+        check("(define square (lambda (x) (* x x)))", "None")
+        check("(square 5)", "25")
