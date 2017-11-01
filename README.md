@@ -15,7 +15,8 @@ On the roadmap...
 - `quote`
 - `cons`, `car`, `cdr`
 - `cond`
-- And better overall testing...
+
+Used https://repl.it/languages/scheme as a reference implementation. (not all things are the same about Scheme and this implementation of lisp; for example, Scheme doesn't have an `atom?` built-in)
 
 
 There are two parts
