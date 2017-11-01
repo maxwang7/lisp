@@ -26,7 +26,7 @@ class Symbol(Atom):
         self.value = value
 
     def run(self, context):
-        return context.symbols[self.value].run()
+        return context.symbols[self.value].run(context)
 
 class List(Expression):
     def __init__(self):
@@ -42,8 +42,9 @@ class List(Expression):
             lambda_fn = self.args[0].args[2]
             lambda_args = self.args[1:]
             program = Program()
+            program.context.symbols = dict(context.symbols)
             for param, val in zip(lambda_params, lambda_args):
-                program.context.symbols[param.value] = val.run(context)
+                program.context.symbols[param.value] = val
             program.asts.append(lambda_fn)
             result = program.step()
             return result
@@ -56,7 +57,20 @@ class List(Expression):
             return (arg_type in [Atom, Integer, Symbol])
         elif self.args[0].value == "+":
             return self.args[1].run(context) + self.args[2].run(context)
+        elif self.args[0].value == "-":
+            return self.args[1].run(context) - self.args[2].run(context)
+        elif self.args[0].value == "*":
+            return self.args[1].run(context) * self.args[2].run(context)
+        elif self.args[0].value == "/":
+            return self.args[1].run(context) / self.args[2].run(context)
+        elif self.args[0].value in context.symbols:
+            temp_list = List()
+            temp_list.args.append(
+                context.symbols[self.args[0].value])
+            temp_list.args.extend(self.args[1:])
+            return temp_list.run(context)
         else:
+            import pdb; pdb.set_trace()
             print "unknown form"
 
 class Context(object):
