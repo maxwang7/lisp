@@ -2,12 +2,11 @@
 
 Version: V0.0
 
-This interpreter is currently non-interactive. There are two parts
+There are two parts
 - parser - implemented in `parse()`. This function takes a raw Lisp
 string input and builds an abstract syntax tree (AST).
 - execution - implemented in `run()`. This function takes in an AST
-and executes the expressions. There is currently no good way to
-see the output except that each expression is evaluated individually.
+and executes the expressions.
 
 Class design:
 

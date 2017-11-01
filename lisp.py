@@ -70,7 +70,6 @@ class List(Expression):
             temp_list.args.extend(self.args[1:])
             return temp_list.run(context)
         else:
-            import pdb; pdb.set_trace()
             print "unknown form"
 
 class Context(object):
