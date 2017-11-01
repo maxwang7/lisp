@@ -2,6 +2,8 @@
 
 Try it out! `python lisp.py`
 
+Run tests: `python lisp.py test`
+
 Supports:
 - `eq?`
 - `atom?`
