@@ -1,26 +1,92 @@
 import re
 
-
 class Expression(object):
+    def __init__(self, parent = None):
+        self.parent = parent
+
+    def run(self, context):
+        pass
+
+class List(Expression):
     def __init__(self):
+        super(List, self).__init__()
         self.args = []
-        self.parent = None
 
-    def addArg(self, expression_or_atom):
-        self.args.append(expression_or_atom)
+class Atom(Expression):
+    def __init__(self, value = None):
+        super(Atom, self).__init__()
+        self.value = value
 
-    def setParent(self, parent_expression):
-        self.parent = parent_expression
+class Integer(Atom):
+    def __init__(self, value = None):
+        super(Integer, self).__init__()
+        self.value = value
 
-class Atom(object):
-    def __init__(self, atom):
-        self.atom = atom
+class Symbol(Atom):
+    def __init__(self, value = None):
+        super(Symbol, self).__init__()
+        self.value = value
 
 class Context(object):
-    def _init__(self):
-        self.bindings = {}
+    def __init__(self):
+        self.symbols = {}
 
-def parser(raw):
+class Program(object):
+    def __init__(self):
+        self.asts = []
+        self.cur_pos = 0 # the expression that's about to be run
+        self.context = Context()
+
+    def step(self):
+        return self.asts[self.cur_pos].run(self.context)
+
+    def hasFinished(self):
+        return self.cur_pos >= len(self.asts)
+
+def parse(raw):
+    program = Program()
+
+    cur_list = None
+    atom_so_far = ""
+
+    def isInteger(atom):
+        try:
+            int(atom)
+            return True
+        except ValueError:
+            return False
+
+    for ch in raw:
+        should_end_atom = (ch in ["(", ")", " "])
+        if should_end_atom and atom_so_far != "":
+            new_atom = None
+            if isInteger(atom_so_far):
+                new_atom = Integer(value = int(atom_so_far))
+            else:
+                new_atom = Symbol(value = atom_so_far)
+
+            if cur_list:
+                cur_list.args.append(new_atom)
+            else:
+                program.asts.append(new_atom)
+
+            atom_so_far = ""
+
+        if ch == "(":
+            new_list = List()
+            if cur_list:
+                cur_list.args.append(new_list)
+                new_list.parent = cur_list
+            else:
+                program.asts.append(new_list)
+            cur_list = new_list
+        elif ch == ")":
+            import pdb; pdb.set_trace()
+            cur_list = cur_list.parent
+        elif ch != " " and ch != "\n" and ch != "\t":
+            atom_so_far += ch
+    return program
+    """
     result = Expression()
     cur_expression = result
     cur_atom = ""
@@ -43,14 +109,15 @@ def parser(raw):
             cur_atom += ch
 
     return result
+"""
 
-def run(ast):
+def run(program):
     import pdb; pdb.set_trace()
 
     bindings = {}
     stack = list(ast.args)
 
-    def valueOf(atom):
+    def valueOfAtom(atom):
         try:
             return int(atom.atom)
         except ValueError:
@@ -59,12 +126,20 @@ def run(ast):
             except ValueError:
                 return bindings[atom.atom]
 
+    def valueOf(expression_or_atom):
+        if type(expression_or_atom) == Expression:
+            return expression_or_atom.val
+        elif type(expression_or_atom) == Atom:
+            return valueOfAtom(expression_or_atom)
+        else:
+            print "invalid"
+
     def evaluate(expression):
         # TODO expression may have sub expressions that are already pre-evaluated
         # deal with that
         args = expression.args
         if args[0].atom == 'define':
-            bindings[args[1].atom] = args[2].atom
+            bindings[valueOf(args[1].atom)] = valueOf(args[2].atom)
             return
         elif args[0].atom == '+':
             return valueOf(args[1]) + valueOf(args[2])
@@ -90,6 +165,7 @@ def run(ast):
             print "it's an atom!"
     import pdb; pdb.set_trace()
 
-input_str = "(define a 1) (define a 2) (define b 2) (+ a b)"
-ast = parser(input_str)
-run(ast)
+if __name__ == "__main__":
+    input_str = "(define a 1) (define a 2) (+ (+ a b) 1)" # => 4
+    program = parse(input_str)
+    run(program)
