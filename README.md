@@ -33,7 +33,7 @@ Expression
       - `symbol` - the symbol string
 
 For example, the string 
-`"(define a 1) (define a 2) (+ (+ a b) 1)"`
+`"(define a 1) (define b 2) (+ (+ a b) 1)"`
 should produce the following program.asts (`parent` and functions omitted):
 
 [

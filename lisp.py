@@ -12,6 +12,14 @@ class List(Expression):
         super(List, self).__init__()
         self.args = []
 
+    def run(self, context):
+        if self.args[0].value == "define":
+            context.symbols[self.args[1].value] = self.args[2].run(context)
+        elif self.args[0].value == "+":
+            return self.args[1].run(context) + self.args[2].run(context)
+        else:
+            print "unknown form"
+
 class Atom(Expression):
     def __init__(self, value = None):
         super(Atom, self).__init__()
@@ -22,10 +30,16 @@ class Integer(Atom):
         super(Integer, self).__init__()
         self.value = value
 
+    def run(self, context):
+        return self.value
+
 class Symbol(Atom):
     def __init__(self, value = None):
         super(Symbol, self).__init__()
         self.value = value
+
+    def run(self, context):
+        return context.symbols[self.value]
 
 class Context(object):
     def __init__(self):
@@ -38,7 +52,9 @@ class Program(object):
         self.context = Context()
 
     def step(self):
-        return self.asts[self.cur_pos].run(self.context)
+        result = self.asts[self.cur_pos].run(self.context)
+        self.cur_pos += 1
+        return result
 
     def hasFinished(self):
         return self.cur_pos >= len(self.asts)
@@ -57,7 +73,7 @@ def parse(raw):
             return False
 
     for ch in raw:
-        should_end_atom = (ch in ["(", ")", " "])
+        should_end_atom = (ch in ["(", ")", " ", "\t", "\n"])
         if should_end_atom and atom_so_far != "":
             new_atom = None
             if isInteger(atom_so_far):
@@ -81,91 +97,16 @@ def parse(raw):
                 program.asts.append(new_list)
             cur_list = new_list
         elif ch == ")":
-            import pdb; pdb.set_trace()
             cur_list = cur_list.parent
         elif ch != " " and ch != "\n" and ch != "\t":
             atom_so_far += ch
     return program
-    """
-    result = Expression()
-    cur_expression = result
-    cur_atom = ""
-
-    for ch in raw:
-        should_end_atom = (ch in ["(", ")", " "])
-
-        if should_end_atom and cur_atom != "":
-            cur_expression.addArg(Atom(cur_atom))
-            cur_atom = ""
-
-        if ch == "(":
-            new_expression = Expression()
-            cur_expression.addArg(new_expression)
-            new_expression.setParent(cur_expression)
-            cur_expression = new_expression
-        elif ch == ")":
-            cur_expression = cur_expression.parent
-        elif ch != " ":
-            cur_atom += ch
-
-    return result
-"""
 
 def run(program):
-    import pdb; pdb.set_trace()
-
-    bindings = {}
-    stack = list(ast.args)
-
-    def valueOfAtom(atom):
-        try:
-            return int(atom.atom)
-        except ValueError:
-            try:
-                return int(bindings[atom.atom])
-            except ValueError:
-                return bindings[atom.atom]
-
-    def valueOf(expression_or_atom):
-        if type(expression_or_atom) == Expression:
-            return expression_or_atom.val
-        elif type(expression_or_atom) == Atom:
-            return valueOfAtom(expression_or_atom)
-        else:
-            print "invalid"
-
-    def evaluate(expression):
-        # TODO expression may have sub expressions that are already pre-evaluated
-        # deal with that
-        args = expression.args
-        if args[0].atom == 'define':
-            bindings[valueOf(args[1].atom)] = valueOf(args[2].atom)
-            return
-        elif args[0].atom == '+':
-            return valueOf(args[1]) + valueOf(args[2])
-        else:
-            print "unknown function: '{}'".format(expression.args[0].atom)
-
-    while len(stack) > 0:
-        head = stack.pop(0)
-        if type(head) == Expression:
-            has_sub_expression = False
-            for arg in head.args:
-                if type(arg) == Expression and not arg.val:
-                    stack.insert(0, head)
-                    stack.insert(0, arg)
-                    has_sub_expression = True
-                    break
-            if has_sub_expression:
-                continue
-            val = evaluate(head)
-            print "{}: {}".format(head, val)
-            head.val = val
-        elif type(head) == Atom:
-            print "it's an atom!"
-    import pdb; pdb.set_trace()
+    while not program.hasFinished():
+        print program.step()
 
 if __name__ == "__main__":
-    input_str = "(define a 1) (define a 2) (+ (+ a b) 1)" # => 4
+    input_str = "(define a 1) (define b 2) (+ (+ a b) 1)" # => 4
     program = parse(input_str)
     run(program)
