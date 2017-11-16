@@ -1,6 +1,25 @@
 # Design
 
-Version: V0.0
+Try it out! `python lisp.py`
+
+Run tests: `python lisp.py test`
+
+Supports:
+- `eq?`
+- `atom?`
+- `define`
+- `lambda`
+- `cond`
+
+And has the built-ins: `+`, `-`, `*`, `/`
+
+On the roadmap...
+- `quote`
+- `cons`, `car`, `cdr`
+- `cond`
+
+See http://pythonpracticeprojects.com/lisp.html for a high level description of the language specification. Used https://repl.it/languages/scheme as a reference implementation. (not all things are the same about Scheme and this implementation of lisp; for example, Scheme doesn't have an `atom?` built-in)
+
 
 There are two parts
 - parser - implemented in `parse()`. This function takes a raw Lisp
